@@ -8,6 +8,7 @@ import random
 # Updated to conform to flake8 and black standards
 from pygame.locals import (
     RLEACCEL,
+    K_p,
     K_UP,
     K_DOWN,
     K_LEFT,
@@ -95,6 +96,7 @@ class Cloud(pygame.sprite.Sprite):
         if self.rect.right < 0:
             self.kill()
 
+
 # Initialize audio mixer
 pygame.mixer.init()
 
@@ -137,6 +139,13 @@ move_up_sound = pygame.mixer.Sound("sound/Rising_putter.ogg")
 move_down_sound = pygame.mixer.Sound("sound/Falling_putter.ogg")
 collision_sound = pygame.mixer.Sound("sound/Collision.ogg")
 
+# Start timer for showing time on screen
+start_time = pygame.time.get_ticks()
+paused = False
+
+# Font settings
+font = pygame.font.SysFont(None, 32)
+
 # Variable to keep our main loop running
 running = True
 
@@ -166,6 +175,23 @@ while running:
             new_cloud = Cloud()
             clouds.add(new_cloud)
             all_sprites.add(new_cloud)
+
+    # With help from: https://stackoverflow.com/questions/20359845/how-would-i-add-a-running-timer-that-shows-up-on-the-screen-in-pygame
+    if not paused:
+        counting_time = pygame.time.get_ticks() - start_time
+
+        # change milliseconds into minutes, seconds, milliseconds
+        counting_minutes = str(counting_time // 60000).zfill(2)
+        counting_seconds = str((counting_time % 60000) // 1000).zfill(2)
+        counting_millisecond = str(counting_time % 1000).zfill(3)
+
+        counting_string = "%s:%s:%s" % (counting_minutes, counting_seconds, counting_millisecond)
+
+        counting_text = font.render(str(counting_string), 1, (255, 255, 255))
+        counting_rect = counting_text.get_rect(center=screen.get_rect().center)
+
+    screen.blit(counting_text, counting_rect)
+    pygame.display.update()
 
     # Get the set of keys pressed and check for user input
     pressed_keys = pygame.key.get_pressed()
